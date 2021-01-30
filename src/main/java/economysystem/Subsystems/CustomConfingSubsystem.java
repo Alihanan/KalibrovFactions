@@ -1,4 +1,4 @@
-package economysystem.Subsystems;
+package economysystem.subsystems;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,23 +20,24 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import economysystem.MedievalEconomy;
+
+import factionsystem.Main;;
 
 public class CustomConfingSubsystem {
 	public HashMap <String,Integer> currency = new HashMap <String,Integer>();
 	public ItemStack[][] guis;
-	MedievalEconomy medievalEconomy = null;
+	Main plugin = null;
 	private FileConfiguration customConfig = null;
     private File customConfigFile = null;
 
-    public CustomConfingSubsystem(MedievalEconomy plugin) {
-        medievalEconomy = plugin;
+    public CustomConfingSubsystem(Main plugin) {
+        this.plugin = plugin;
         reloadCustomConfig();
         loadCurrency();
     }
     public void reloadCustomConfig() {
         if (customConfigFile == null) {
-        customConfigFile = new File(medievalEconomy.getDataFolder(), "customConfig.yml");
+        customConfigFile = new File(plugin.getDataFolder(), "customConfig.yml");
         }
         customConfig = YamlConfiguration.loadConfiguration(customConfigFile);
 
@@ -56,10 +57,13 @@ public class CustomConfingSubsystem {
         try {
             getCustomConfig().save(customConfigFile);
         } catch (IOException ex) {
-        	medievalEconomy.getLogger().log(Level.SEVERE, "Could not save config to " + customConfigFile, ex);
+        	plugin.getLogger().log(Level.SEVERE, "Could not save config to " + customConfigFile, ex);
         }
     }
     public void loadCurrency() {
+    	if(customConfig.getConfigurationSection("currency") == null) {
+    		return;
+    	}
     	for (String key : customConfig.getConfigurationSection("currency").getKeys(false)) {
     		Object itemvalue = customConfig.get("currency."+key);
     		if (itemvalue.getClass().equals(Integer.class))

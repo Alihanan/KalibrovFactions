@@ -1,4 +1,4 @@
-package economysystem.Commands;
+package economysystem.commands;
 
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -7,15 +7,13 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
-import economysystem.MedievalEconomy;
-import economysystem.Objects.Coinpurse;
-import org.bukkit.ChatColor;
+import factionsystem.Main;
 
 public class TradeToRealCommand {
-	MedievalEconomy medievalEconomy = null;
+	Main plugin = null;
 
-	public TradeToRealCommand(MedievalEconomy plugin) {
-		medievalEconomy = plugin;
+	public TradeToRealCommand(Main plugin) {
+		this.plugin = plugin;
 	}
 
 	public static Vector TradeToReal(int Coin) {
@@ -31,22 +29,16 @@ public class TradeToRealCommand {
 		if (sender instanceof Player) {
 			Vector returnet = TradeToReal(cauntcoin);
 			Player player = (Player) sender;
-			Coinpurse purse = medievalEconomy.utilities.getPlayersCoinPurse(player.getUniqueId());
-			int playercoins = purse.getCoins();
-			if (playercoins >= cauntcoin) {
-				playercoins -= cauntcoin;
-				purse.setCoins(playercoins);
-				Inventory playerinv = player.getInventory();
-				ItemStack nuggets = new ItemStack(Material.GOLD_NUGGET, returnet.getBlockX());
-				ItemStack gingots = new ItemStack(Material.GOLD_INGOT, returnet.getBlockY());
-				int cauntgblock = (int) returnet.getBlockZ();
-				ItemStack gblocks = new ItemStack(Material.GOLD_BLOCK);
-				for (int i = 0; i < cauntgblock; i++) {
-					playerinv.addItem(gblocks);
-				}
-				playerinv.addItem(nuggets);
-				playerinv.addItem(gingots);
+			Inventory playerinv = player.getInventory();
+			ItemStack nuggets = new ItemStack(Material.GOLD_NUGGET, returnet.getBlockX());
+			ItemStack gingots = new ItemStack(Material.GOLD_INGOT, returnet.getBlockY());
+			int cauntgblock = (int) returnet.getBlockZ();
+			ItemStack gblocks = new ItemStack(Material.GOLD_BLOCK);
+			for (int i = 0; i < cauntgblock; i++) {
+				playerinv.addItem(gblocks);
 			}
+			playerinv.addItem(nuggets);
+			playerinv.addItem(gingots);
 		}
 	}
 

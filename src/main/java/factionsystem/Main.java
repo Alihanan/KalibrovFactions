@@ -15,7 +15,6 @@ import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.AreaEffectCloud;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -61,6 +60,9 @@ import Professions.HorsePenaltyEvent;
 import Professions.PlayerBreakBlockHandler;
 import Professions.PlayerProfession;
 import Professions.ProfessionProtocolManager;
+import economysystem.CitizensNPC.TraderTrait;
+import economysystem.events.PlayerClickEventHandler;
+import economysystem.subsystems.CustomConfingSubsystem;
 import factionsystem.EventHandlers.AreaEffectCloudApplyEventHandler;
 import factionsystem.EventHandlers.AsyncPlayerChatEventHandler;
 import factionsystem.EventHandlers.BlockBreakEventHandler;
@@ -87,6 +89,7 @@ import factionsystem.Subsystems.StorageSubsystem;
 import factionsystem.Subsystems.UtilitySubsystem;
 import factionsystem.Util.Pair;
 import factionsystem.bStats.Metrics;
+import net.citizensnpcs.api.npc.NPC;
 
 
 public class Main extends JavaPlugin implements Listener {
@@ -132,6 +135,10 @@ public class Main extends JavaPlugin implements Listener {
     public HashSet<Block> tradeChests = new HashSet<Block>();
     ProfessionProtocolManager ppm; // For professions
     public CaravanCultureManager scp; // For skin change
+    
+    // ECONOMY
+    //public CustomConfingSubsystem customconfig = new CustomConfingSubsystem(this);
+    public HashMap<Player, NPC> tradingCurrently = new HashMap<Player, NPC>();
     
     @Override
     public void onEnable() {
@@ -193,6 +200,8 @@ public class Main extends JavaPlugin implements Listener {
         nickNamer = (NickNamerPlugin)getServer().getPluginManager().getPlugin("NickNamer");
         protocolLib = (ProtocolLib)getServer().getPluginManager().getPlugin("ProtocolLib");
         protocolManager = ProtocolLibrary.getProtocolManager();
+        System.out.println(ChatColor.AQUA + "[KARAVANY] Setting Citizens ...");
+        enableEconomy();
         
         System.out.println(ChatColor.AQUA + "[KARAVANY] Setting Citizens ...");
         // SET CITIZENS
@@ -200,9 +209,12 @@ public class Main extends JavaPlugin implements Listener {
         		net.citizensnpcs.api.trait.TraitInfo.create(ConvoyFollowerTrait.class).withName("convoyFollowerTrait"));
         net.citizensnpcs.api.CitizensAPI.getTraitFactory().registerTrait(
         		net.citizensnpcs.api.trait.TraitInfo.create(NPCConvoyTrait.class).withName("NPCConvoyTrait"));
+        net.citizensnpcs.api.CitizensAPI.getTraitFactory().registerTrait(
+        		net.citizensnpcs.api.trait.TraitInfo.create(TraderTrait.class).withName("TraderTrait"));
         new ConvoySubsystem(this).runTaskTimer(this, 20, 100);       
         getServer().getPluginManager().registerEvents(new ConvoyDamageListener(this), this);  
         getServer().getPluginManager().registerEvents(new NPCConvoyDeathHandler(this), this);  
+        //getServer().getPluginManager().registerEvents(new NPCRightClickHandler(this), this);  
         
         System.out.println(ChatColor.AQUA + "[KARAVANY] Enabling professions ...");
         // SET PROFESSIONS
@@ -241,7 +253,34 @@ public class Main extends JavaPlugin implements Listener {
         // 36000 = 30 min
         
         
-    }    	
+        
+        
+        
+    }   
+    // ##############################################################
+    /**
+     * Vlad, eto tvoe (snizu)
+     */
+    private void enableEconomy() {    	
+    	//customconfig.loadCurrency();    	
+    }
+    private void saveEconomy() {    	
+    	//customconfig.saveCurrency();    	
+    }
+    private void disableEconomy() {
+    	saveEconomy();
+    }
+    @EventHandler()
+    public void PlayerClickEvent(InventoryClickEvent ice) {
+    	PlayerClickEventHandler creh = new PlayerClickEventHandler(this);
+    	creh.GUIClick(ice);
+    } 
+    /**
+     * Vlad, eto tvoe ^^^^^^^
+     */
+    // ##############################################################
+    
+    
     @EventHandler()
     public void HorseEventHandler(PlayerInteractEntityEvent ice) {
     	HorsePenaltyEvent creh = new HorsePenaltyEvent(this);
@@ -277,6 +316,7 @@ public class Main extends JavaPlugin implements Listener {
 			allTradePosts.clear();
 			ss.save();
 			scp.save();
+			saveEconomy();
 			
 			for(Faction f : factions) {
 				Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -303,6 +343,7 @@ public class Main extends JavaPlugin implements Listener {
         System.out.println("Medieval Factions plugin disabled.");
         PlayerProfession.save(professions);
         scp.save();
+        disableEconomy();
         System.out.println(ChatColor.AQUA + "KARAVANY ADDON disabled. Everything saved");
     }
 

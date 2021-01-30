@@ -1,4 +1,4 @@
-package economysystem.Commands;
+package economysystem.commands;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,16 +7,15 @@ import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
-import org.bukkit.block.Container;
 import org.bukkit.inventory.ItemStack;
 
-import economysystem.MedievalEconomy;
+import factionsystem.Main;
 
 public class ChunkCoinsCommand {
-	MedievalEconomy medievalEconomy = null;
+	Main plugin = null;
 
-	public ChunkCoinsCommand(MedievalEconomy plugin) {
-		medievalEconomy = plugin;
+	public ChunkCoinsCommand(Main plugin) {
+		this.plugin = plugin;
 	}
 
 	public static int chunkCoins(Chunk chunk) {

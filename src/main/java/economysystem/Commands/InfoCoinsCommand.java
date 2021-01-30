@@ -1,8 +1,6 @@
-package economysystem.Commands;
+package economysystem.commands;
 
-import economysystem.Objects.Coinpurse;
-import economysystem.MedievalEconomy;
-
+import factionsystem.Main;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -19,10 +17,10 @@ import org.bukkit.inventory.ItemStack;
 
 public class InfoCoinsCommand {
 
-	MedievalEconomy medievalEconomy = null;
+	Main plugin = null;
 
-	public InfoCoinsCommand(MedievalEconomy plugin) {
-		medievalEconomy = plugin;
+	public InfoCoinsCommand(Main plugin) {
+		plugin = plugin;
 	}
 
 	public static int infoCoins(Player player) {

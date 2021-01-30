@@ -1,4 +1,4 @@
-package economysystem.EventHandlers;
+package economysystem.events;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -6,10 +6,10 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import economysystem.MedievalEconomy;
-import economysystem.Commands.InfoCoinsCommand;
-import economysystem.Commands.TradeToRealCommand;
-import economysystem.Objects.Coinpurse;
+import economysystem.CitizensNPC.TraderTrait;
+import economysystem.commands.InfoCoinsCommand;
+import economysystem.commands.TradeToRealCommand;
+import factionsystem.Main;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -17,10 +17,10 @@ import org.bukkit.Material;
 
 public class PlayerClickEventHandler {
 
-	MedievalEconomy medievalEconomy = null;
+	Main plugin = null;
 
-	public PlayerClickEventHandler(MedievalEconomy plugin) {
-		medievalEconomy = plugin;
+	public PlayerClickEventHandler(Main plugin) {
+		this.plugin = plugin;
 	}
 
 	public void GUIClick(InventoryClickEvent event) {
@@ -30,27 +30,37 @@ public class PlayerClickEventHandler {
 
 		String page = event.getInventory().getTitle().split(" ")[0];
 
+		TraderTrait trait = plugin.tradingCurrently.get(player).getTrait(TraderTrait.class);
+		
 		if (page.equalsIgnoreCase(ChatColor.AQUA + "Страница")) {			
 			String pagenum = event.getInventory().getTitle().split(" ")[1];
 			int pageintnum = Integer.parseInt(pagenum);
-		
+			int index_page = pageintnum - 1;
+			
+			
 			switch (event.getCurrentItem().getType()) {
 			case STAINED_GLASS_PANE:
 				event.setCancelled(true);
 				String buttonname = event.getCurrentItem().getItemMeta().getDisplayName();
 				if (buttonname.equals("Предыдущая страница")) {
-					if (pageintnum-1<0) {pageintnum = medievalEconomy.customconfig.guis.length;}
+					index_page--;
+					if (index_page<0) {
+						index_page = trait.guis.length - 1;
+					}
 					player.closeInventory();
-					Inventory gui = Bukkit.createInventory(player, 27,ChatColor.AQUA+ "Страница "+(pageintnum-1));
-					gui.setContents(medievalEconomy.customconfig.guis[pageintnum-2]);
+					Inventory gui = Bukkit.createInventory(player, 27,ChatColor.AQUA+ "Страница "+ (index_page + 1));
+					gui.setContents(trait.guis[index_page]);
 					player.openInventory(gui);
+					break;
 				}
 				if (buttonname.equals("Следующая страница")) {
-					if (pageintnum>=medievalEconomy.customconfig.guis.length) {pageintnum = 1;}
+					index_page++;
+					if (index_page == trait.guis.length) {index_page = 0;}
 					player.closeInventory();
-					Inventory gui = Bukkit.createInventory(player, 27,ChatColor.AQUA+ "Страница "+(pageintnum+1));
-					gui.setContents(medievalEconomy.customconfig.guis[pageintnum]);
+					Inventory gui = Bukkit.createInventory(player, 27,ChatColor.AQUA+ "Страница "+(index_page+1));
+					gui.setContents(trait.guis[index_page]);
 					player.openInventory(gui);
+					break;
 				}
 				break;
 				

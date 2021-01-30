@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import Karavany.TradePoint;
 import Karavany.TradePointCommand;
 import Professions.ProfessionsCommand;
+import economysystem.EconomyCommandHandler;
 
 import static factionsystem.Subsystems.UtilitySubsystem.*;
 
@@ -25,6 +26,13 @@ public class CommandSubsystem {
     }
 
     public boolean interpretCommand(CommandSender sender, String label, String[] args) {
+    	if (label.equalsIgnoreCase("econ")) {		
+    		EconomyCommandHandler ech = new EconomyCommandHandler(main);
+    		ech.handle(sender, args);
+    		return true;
+    	}
+    	
+    	
     	if (label.equalsIgnoreCase("prof")) {
     		
     		ProfessionsCommand pc = new ProfessionsCommand(main);
