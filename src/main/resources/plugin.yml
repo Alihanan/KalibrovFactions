@@ -1,0 +1,13 @@
+name: MedievalFactions
+version: 3.6
+author: KingdomProgrammers
+main: factionsystem.Main
+api-version: 1.13
+depend: [Citizens, Holograms, NickNamer, ProtocolLib, NPC_Destinations, SkinsRestorer]
+
+commands:
+  mf:
+  f:
+  medievalfactions:
+  factions:
+  prof:
