@@ -1,4 +1,5 @@
-<<<<<<< HEAD
+## Kalibrov Factions
+
 # What is this?
 An open source minecraft plugin licensed under GPL3 for players to use to organize politically. Allows them to create/manage factions, declare/end wars, and claim/unclaim land. It also supports promoting/demoting players to and from officer positions as well as a power level system to decide land limits. Finally, it supports faction homes, alliances, locks and more.
 
