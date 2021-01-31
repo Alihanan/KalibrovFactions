@@ -13,16 +13,17 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import economysystem.commands.InfoCoinsCommand;
+import economysystem.commands.TradeToRealCommand;
 import factionsystem.Main;
 import net.citizensnpcs.api.event.NPCLeftClickEvent;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.Trait;
-import sun.util.locale.LocaleMatcher;
 
 public class TraderTrait extends Trait{
 
-	HashMap<ItemStack, Integer> itemsToSell = new HashMap<ItemStack, Integer>();
+	HashMap<Material, Integer> itemsToSell = new HashMap<Material, Integer>();
 	public ItemStack[][] guis;	
 	
 	
@@ -32,7 +33,7 @@ public class TraderTrait extends Trait{
 		super("TraderTrait");
 	}
 	
-	public TraderTrait(HashMap<ItemStack, Integer> items, Main plugin) {
+	public TraderTrait(HashMap<Material, Integer> items, Main plugin) {
 		super("TraderTrait");
 		setPrices(items);
 		this.plugin = plugin;
@@ -48,41 +49,16 @@ public class TraderTrait extends Trait{
 	public void run() {
 		// Каждый Тик делает что то
 	}
-	public HashMap<ItemStack, Integer> getPrices(){
+	public HashMap<Material, Integer> getPrices(){
 		return itemsToSell;
 	}
 	
-	public void setPrices(HashMap<ItemStack, Integer> items) {
-		itemsToSell = items;
-		guis = new ItemStack[items.size()/25+1][27];
-    	
-    	for (int i=0;i<guis.length;i++) {   		
-			Set<ItemStack> keyitem = items.keySet();
-			ArrayList <ItemStack> containkeyitem = new ArrayList(keyitem);
-			for (int j = 0; j < 25;j++) {	
-				if (i*25+j >= containkeyitem.size()) {break;}
-				ItemStack item = containkeyitem.get(i*25+j);
-				int price = items.get(item);
-				ItemMeta temitem_meta = item.getItemMeta();
-				//temitem_meta.setDisplayName(materialkey.toString());
-				ArrayList <String> temitem_lore = new ArrayList<>();
-				temitem_lore.add("Цена "+price);
-				temitem_meta.setLore(temitem_lore);
-				item.setItemMeta(temitem_meta);
-				guis[i][j] = item;				
-			}
-			ItemStack nextbutton = new ItemStack (Material.STAINED_GLASS_PANE,1,(short) 13);
-			ItemMeta nextbutton_meta = nextbutton.getItemMeta();
-			nextbutton_meta.setDisplayName("Следующая страница");
-			nextbutton.setItemMeta(nextbutton_meta);
-			guis[i][26] = nextbutton;
-			ItemStack prevbutton = new ItemStack (Material.STAINED_GLASS_PANE,1,(short) 14);
-			ItemMeta prevbutton_meta = prevbutton.getItemMeta();
-			prevbutton_meta.setDisplayName("Предыдущая страница");
-			prevbutton.setItemMeta(prevbutton_meta);
-			guis[i][25] = prevbutton;
-    	}
+	public void setPrices(HashMap<Material, Integer> items) {
+		itemsToSell.putAll(items);
+		
 	}
+	
+	
 	/**
 	 * After player clicks in market inventory
 	 * @param is = chosen stack
@@ -95,9 +71,61 @@ public class TraderTrait extends Trait{
 	 * After player right clicks with item
 	 * @param is
 	 */
-	public void sellItem(ItemStack is) {
+	public void sellItem(ItemStack is, Player player) {
 		// Add stack to stocks
-		// Take money
+		int price = 25;
+		
+		//itemsToSell.put(is, 25);
+		player.getInventory().remove(is);
+		int playercoins = InfoCoinsCommand.infoCoins(player);
+		// Give money
+		TradeToRealCommand.TakeCoins(player);
+		TradeToRealCommand.GiveCoins(player, playercoins + price * 2, price);
+	}
+	
+	public void createGUI(Player player) {
+		guis = new ItemStack[itemsToSell.size()/25+1][27];
+		
+		
+    	for (int i=0;i<guis.length;i++) {   		
+			Set<Material> keyitem = itemsToSell.keySet();
+			ArrayList <Material> containkeyitem = new ArrayList<Material>(keyitem);
+			for (int j = 0; j < 25;j++) {	
+				if (i*25+j >= containkeyitem.size()) {break;}
+				Material item = containkeyitem.get(i*25+j);
+				System.out.println("ITEM:" + item.toString());
+				System.out.println("ITEMTOSELL:" + itemsToSell.toString());
+				for(Material is : itemsToSell.keySet())
+					System.out.println(is.toString());
+				
+				int price = itemsToSell.get(item);
+				ItemStack gItem = new ItemStack(item);
+				// Set item price to meta
+				ItemMeta temitem_meta = gItem.getItemMeta();				
+				ArrayList <String> temitem_lore = new ArrayList<>();
+				temitem_lore.add("Цена "+price);
+				temitem_meta.setLore(temitem_lore);
+				gItem.setItemMeta(temitem_meta);
+				guis[i][j] = gItem;				
+			}
+			
+			
+			ItemStack nextbutton = new ItemStack (Material.STAINED_GLASS_PANE,1,(short) 13);
+			ItemMeta nextbutton_meta = nextbutton.getItemMeta();
+			nextbutton_meta.setDisplayName("Следующая страница");
+			nextbutton.setItemMeta(nextbutton_meta);
+			guis[i][26] = nextbutton;
+			
+			ItemStack prevbutton = new ItemStack (Material.STAINED_GLASS_PANE,1,(short) 14);
+			ItemMeta prevbutton_meta = prevbutton.getItemMeta();
+			prevbutton_meta.setDisplayName("Предыдущая страница");
+			prevbutton.setItemMeta(prevbutton_meta);
+			guis[i][25] = prevbutton;
+    	}
+    	Inventory gui = Bukkit.createInventory(player, 27,ChatColor.AQUA+ "Страница 1");
+		gui.setContents(guis[0].clone());
+		player.openInventory(gui);
+		plugin.tradingCurrently.put(player, npc);//TODO
 	}
 	/**
 	 * After player left clicks with item
@@ -117,7 +145,6 @@ public class TraderTrait extends Trait{
 		
 	}
 
-	
 	@EventHandler
 	public void leftClick(NPCLeftClickEvent nle){
 		Player player = nle.getClicker();
@@ -129,12 +156,13 @@ public class TraderTrait extends Trait{
 	public void rightClick(NPCRightClickEvent nre){
 		System.out.println("CLICKED");
 		NPC npc = nre.getNPC();
-		TraderTrait trait = npc.getTrait(TraderTrait.class);
 		Player player = nre.getClicker();
-		Inventory gui = Bukkit.createInventory(player, 27,ChatColor.AQUA+ "Страница 1");
-		gui.setContents(guis[0]);
-		player.openInventory(gui);
-		plugin.tradingCurrently.put(player, npc);
+		ItemStack is = player.getInventory().getItemInMainHand();
+		if(is == null || is.getType() == null || is.getType() == Material.AIR) {
+			createGUI(player);
+		}else {
+			sellItem(is, player);
+		}
 	}
 	
 	

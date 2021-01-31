@@ -32,10 +32,10 @@ public class TraderCommand {
     			+ "Торговец");
 		
 		//HashMap<String, Integer> cc = plugin.customconfig.currency;
-		HashMap<ItemStack, Integer> items = new  HashMap<ItemStack, Integer>();
-		items.put(new ItemStack(Material.DIAMOND), 60);
-		items.put(new ItemStack(Material.WOOD), 1);
-		items.put(new ItemStack(Material.STONE), 4);
+		HashMap<Material, Integer> items = new  HashMap<Material, Integer>();
+		items.put(Material.DIAMOND, 60);
+		items.put(Material.WOOD, 1);
+		items.put(Material.STONE, 4);
 		/*
 		for(String s : cc.keySet()) {
 			Material m = Material.valueOf(s);

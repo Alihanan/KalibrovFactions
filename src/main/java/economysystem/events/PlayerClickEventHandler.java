@@ -5,12 +5,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import economysystem.CitizensNPC.TraderTrait;
 import economysystem.commands.InfoCoinsCommand;
 import economysystem.commands.TradeToRealCommand;
 import factionsystem.Main;
 import net.citizensnpcs.api.npc.NPC;
+
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -28,7 +31,7 @@ public class PlayerClickEventHandler {
 		Player player = (Player) event.getWhoClicked();
 //		Coinpurse purse = medievalEconomy.utilities.getPlayersCoinPurse(player.getUniqueId());
 		int playercoins = InfoCoinsCommand.infoCoins(player);
-
+		ItemStack is = event.getCurrentItem();
 		String page = event.getInventory().getTitle().split(" ")[0];
 
 		NPC npc = plugin.tradingCurrently.get(player);
@@ -36,6 +39,7 @@ public class PlayerClickEventHandler {
 		TraderTrait trait = npc.getTrait(TraderTrait.class);
 		
 		if (page.equalsIgnoreCase(ChatColor.AQUA + "Страница")) {			
+			if(is == null || is.getType() == Material.AIR) return;
 			String pagenum = event.getInventory().getTitle().split(" ")[1];
 			int pageintnum = Integer.parseInt(pagenum);
 			int index_page = pageintnum - 1;
@@ -68,10 +72,14 @@ public class PlayerClickEventHandler {
 				break;
 				
 			default: 
-				String itemprice = event.getCurrentItem().getItemMeta().getLore().get(0).split(" ")[1];
+				if(is == null || is.getType() == Material.AIR) return;
+				ItemMeta im = event.getCurrentItem().getItemMeta();
+				List<String> lore = im.getLore();
+				if(lore == null) return;
+				String itemprice = lore.get(0).split(" ")[1];
 				int itempriceint = Integer.parseInt(itemprice);
 				if (playercoins>=itempriceint) {
-					TradeToRealCommand.TakeCoins(player, itempriceint);
+					TradeToRealCommand.TakeCoins(player);
 					TradeToRealCommand.GiveCoins(player,playercoins,itempriceint);
 					player.getInventory().addItem(new ItemStack (event.getCurrentItem().getType()));
 					player.sendMessage(ChatColor.GREEN+"Операция выполнена, ваш баланс "+(playercoins-itempriceint));

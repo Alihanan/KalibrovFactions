@@ -60,7 +60,8 @@ public class TradeToRealCommand {
 	
 	}
 	
-	public static void TakeCoins(Player player, int itempriceint) {
+	public static void TakeCoins(Player player) {
+			/*
 			Vector returnet = TradeToReal(itempriceint);
 			Inventory playerinv = player.getInventory();
 			ItemStack nuggets = new ItemStack(Material.GOLD_NUGGET, returnet.getBlockX());
@@ -71,7 +72,11 @@ public class TradeToRealCommand {
 				playerinv.removeItem(gblocks);
 			}
 			playerinv.removeItem(nuggets);
-			playerinv.removeItem(gingots);
+			playerinv.removeItem(gingots);*/
+
+			player.getInventory().remove(Material.GOLD_NUGGET);
+			player.getInventory().remove(Material.GOLD_INGOT);
+			player.getInventory().remove(Material.GOLD_BLOCK);
 	}
 	
 }
