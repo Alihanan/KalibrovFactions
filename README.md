@@ -19,6 +19,7 @@ An open source minecraft plugin without license. The medieval realistic economic
 
 # Major Version Changes [X.Y]
 - 0.1 Caravan system ready. Basic trading mechanics added.
+- 0.2 I eat come cake.
 
 
 =======
