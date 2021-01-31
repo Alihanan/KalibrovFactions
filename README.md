@@ -8,6 +8,13 @@ An open source minecraft plugin without license. The medieval realistic economic
 - Physical money based economy = balance is calculated by inventory amount of gold
 - Debuf based profession system = forced labour division
 
+# External plugins
+- Citizens 2 = https://www.spigotmc.org/resources/citizens.13811/
+- NPCDestinations(Citizens addon) = https://www.spigotmc.org/resources/npcdestinations-create-living-npcs.13863/
+- Holograms = https://www.spigotmc.org/resources/holograms.4924/
+- NickNamer = https://www.spigotmc.org/resources/nicknamer-integrated-api.5341/
+- ProtocolLib = https://www.spigotmc.org/resources/protocollib.1997/
+
 # Major Version Changes [X.Y]
 - 0.1 Caravan system ready. Basic trading mechanics added.
 
