@@ -14,6 +14,8 @@ An open source minecraft plugin without license. The medieval realistic economic
 - Holograms = https://www.spigotmc.org/resources/holograms.4924/
 - NickNamer = https://www.spigotmc.org/resources/nicknamer-integrated-api.5341/
 - ProtocolLib = https://www.spigotmc.org/resources/protocollib.1997/
++ copied code from: https://www.spigotmc.org/threads/1-7-2-1-16-show-translated-item-entity-etc-names-in-clients-language.363866/
+(BTW, big thanks for Translated text from me personally)
 
 # Major Version Changes [X.Y]
 - 0.1 Caravan system ready. Basic trading mechanics added.
