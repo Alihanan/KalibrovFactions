@@ -10,6 +10,8 @@ An open source minecraft plugin without license. The main gu
 
 # Major Version Changes [X.Y]
 - 0.1 Caravan system ready. Basic trading mechanics added.
+
+
 =======
 # KalibrovFactions
 >>>>>>> c7c1b9eb29ee50c09166953e4fef96687423d32b
