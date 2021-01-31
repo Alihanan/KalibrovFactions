@@ -5,7 +5,7 @@ An open source minecraft plugin without license. The medieval realistic economic
 
 # Mechanics
 - Caravan(Convoy) transporting resouces with path finding from NPCDestinations(A* adaptation)
-- Physical money based economy = balance is calculated by inventory amount of gold
+- Physical money based economy = balance is calculated by amount of gold in inventory 
 - Debuf based profession system = forced labour division
 
 # External plugins
