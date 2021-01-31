@@ -10,6 +10,7 @@ import economysystem.CitizensNPC.TraderTrait;
 import economysystem.commands.InfoCoinsCommand;
 import economysystem.commands.TradeToRealCommand;
 import factionsystem.Main;
+import net.citizensnpcs.api.npc.NPC;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -30,7 +31,9 @@ public class PlayerClickEventHandler {
 
 		String page = event.getInventory().getTitle().split(" ")[0];
 
-		TraderTrait trait = plugin.tradingCurrently.get(player).getTrait(TraderTrait.class);
+		NPC npc = plugin.tradingCurrently.get(player);
+		if(npc == null) return;
+		TraderTrait trait = npc.getTrait(TraderTrait.class);
 		
 		if (page.equalsIgnoreCase(ChatColor.AQUA + "Страница")) {			
 			String pagenum = event.getInventory().getTitle().split(" ")[1];

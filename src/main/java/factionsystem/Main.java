@@ -60,6 +60,7 @@ import Professions.HorsePenaltyEvent;
 import Professions.PlayerBreakBlockHandler;
 import Professions.PlayerProfession;
 import Professions.ProfessionProtocolManager;
+import economysystem.LocaleQuery;
 import economysystem.CitizensNPC.TraderTrait;
 import economysystem.events.PlayerClickEventHandler;
 import economysystem.subsystems.CustomConfingSubsystem;
@@ -139,7 +140,7 @@ public class Main extends JavaPlugin implements Listener {
     // ECONOMY
     //public CustomConfingSubsystem customconfig = new CustomConfingSubsystem(this);
     public HashMap<Player, NPC> tradingCurrently = new HashMap<Player, NPC>();
-    
+    public LocaleQuery localeManager = new LocaleQuery(); // For item natural language
     @Override
     public void onEnable() {
         System.out.println("Medieval Factions plugin enabling....");

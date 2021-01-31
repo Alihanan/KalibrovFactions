@@ -22,6 +22,8 @@ public class ConvoyFollowerTrait extends Trait{
 	Location offset;
 	Faction myFaction;
 	Player deathEnemy = null;
+	boolean isConvoySet = false;
+	long deathTime = -1;
 	
 	public ConvoyFollowerTrait() {
 		super("convoyFollowerTrait");
@@ -58,6 +60,7 @@ public class ConvoyFollowerTrait extends Trait{
 		if(!super.npc.isSpawned()) {
 			return;
 		}
+		
 		i++;
 		Chunk c = npc.getStoredLocation().getChunk();
 		if(!c.isLoaded()) {
@@ -67,7 +70,21 @@ public class ConvoyFollowerTrait extends Trait{
 			return;
 		}
 		i = 0;
-		if(targetNPC == null) return;
+		if(targetNPC == null) {
+			if(!isConvoySet) {
+				return;
+			}
+			long curr = System.currentTimeMillis();
+			long diff = curr - deathTime;
+			if(deathTime == -1) {
+				deathTime = curr;
+				return;
+			}
+			else if(diff > 60000) {
+				npc.destroy();
+				return;
+			}
+		}
 		
 		if(targetNPC.isSpawned()) {			
 			/* IF CONVOY KILLED = BUG, SOME GUARDS COULDNT RECEIVE
@@ -159,10 +176,12 @@ public class ConvoyFollowerTrait extends Trait{
 	
 	public void setTargetNPC(NPC np) {
 		targetNPC = np;
+		isConvoySet = true;
 	}
 	public void setTargetNPC(NPC np, Location offset) {
 		targetNPC = np;
 		this.offset = offset;
+		isConvoySet = true;
 	}
 	public void setOffset(Location offset) {
 		this.offset = offset;
