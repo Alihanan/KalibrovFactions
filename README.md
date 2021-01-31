@@ -1,7 +1,7 @@
 # Kalibrov Factions
 
 # What is this?
-An open source minecraft plugin without license. The main gu
+An open source minecraft plugin without license. The medieval realistic economical system.
 
 # Mechanics
 - Caravan(Convoy) transporting resouces with path finding from NPCDestinations(A* adaptation)
