@@ -17,6 +17,7 @@ import factionsystem.Main;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.event.NPCTraitCommandAttachEvent;
 import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.trait.LookClose;
 
 public class TraderCommand {
 	Main plugin;
@@ -33,9 +34,12 @@ public class TraderCommand {
 		
 		//HashMap<String, Integer> cc = plugin.customconfig.currency;
 		HashMap<Material, Integer> items = new  HashMap<Material, Integer>();
-		items.put(Material.DIAMOND, 60);
-		items.put(Material.WOOD, 1);
-		items.put(Material.STONE, 4);
+		items.put(Material.DIAMOND, 17);
+		items.put(Material.DIAMOND_SWORD, 3);
+		items.put(Material.WOOD, 80);
+		items.put(Material.STONE, 80);
+		
+		
 		/*
 		for(String s : cc.keySet()) {
 			Material m = Material.valueOf(s);
@@ -45,6 +49,10 @@ public class TraderCommand {
 		}*/
     	npc2.addTrait(new TraderTrait(items, plugin));  
 		Bukkit.getPluginManager().callEvent(new NPCTraitCommandAttachEvent(npc2, TraderTrait.class, null));
+		
+		npc2.getOrAddTrait(LookClose.class).setRandomLook(true);
+		npc2.getOrAddTrait(LookClose.class).setRandomLookDelay(20);
+		npc2.getOrAddTrait(LookClose.class).toggle();
 		
 		npc2.spawn(loc);
 	}
