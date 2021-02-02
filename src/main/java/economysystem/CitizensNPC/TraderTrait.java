@@ -3,6 +3,7 @@ package economysystem.CitizensNPC;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -32,7 +33,7 @@ public class TraderTrait extends Trait{
 	int balance; 
 	// How often we should update prices
 	// 20 ~= 1 sec
-	final int PRICE_UPDATE_TICKRATE = 20;
+	final int PRICE_UPDATE_TICKRATE = 10;
 	
 	Main plugin;
 	
@@ -48,10 +49,6 @@ public class TraderTrait extends Trait{
 		super("TraderTrait");		
 		addToStock(items);		
 		this.plugin = plugin;
-		
-		prices.put(Material.WOOD, new ItemInfoTrading(1, 1, System.currentTimeMillis(), Material.WOOD));
-		prices.put(Material.DIAMOND_SWORD, new ItemInfoTrading(10, 10, System.currentTimeMillis(), Material.DIAMOND_SWORD));
-		prices.put(Material.STONE, new ItemInfoTrading(2, 2, System.currentTimeMillis(), Material.STONE));
 	}
 	
 	public void loadPrices(ArrayList<ItemInfoTrading> pricess) {
@@ -75,11 +72,6 @@ public class TraderTrait extends Trait{
 				}else {
 					int added = items.get(m);
 					stock.put(m, added);
-					if(!prices.containsKey(m)) {
-						// TODO load default ones
-						ItemInfoTrading iit = new ItemInfoTrading(1, 1, System.currentTimeMillis(), m);
-						prices.put(m, iit);
-					}
 				}
 			}			
 		}
@@ -125,7 +117,7 @@ public class TraderTrait extends Trait{
 			}
 			// Меняем
 			for(ItemInfoTrading iit : prices.values()) {
-				iit.marketChange();
+				iit.marketChange(stock.get(iit.ItemType));
 			}
 		}
 	}
@@ -158,7 +150,7 @@ public class TraderTrait extends Trait{
 			return;
 		}
 
-		int price = prices.get(m).getPrice() * amount;
+		int price = prices.get(m).getPrice(amount);
 		int playercoins = InfoCoinsCommand.infoCoins(player);
 		if(playercoins < price) {
 			player.sendMessage(ChatColor.RED+"Недостаточно средств, ваш баланс "+playercoins);
@@ -172,7 +164,8 @@ public class TraderTrait extends Trait{
 		ItemStack toGive = new ItemStack(m, amount);
 		player.getInventory().addItem(toGive);
 		player.sendMessage(ChatColor.GREEN+"Операция выполнена, ваш баланс "+(playercoins-price));
-		//prices.get(m).itemSold(); // Update prices
+		
+		prices.get(m).itemSold(stock.get(m)); // Update prices
 		
 		// restart GUI
 		player.closeInventory();
@@ -193,7 +186,8 @@ public class TraderTrait extends Trait{
 			return;
 		}
 		addToStock(is);
-		int price = prices.get(is.getType()).getPrice() * is.getAmount() / 2;
+		int price = prices.get(is.getType()).getPrice(is.getAmount()) / 2;
+		if(price == 0) price = 1;
 
 		player.getInventory().removeItem(is);
 		int playercoins = InfoCoinsCommand.infoCoins(player);
@@ -201,7 +195,7 @@ public class TraderTrait extends Trait{
 		TradeToRealCommand.TakeCoins(player);
 		TradeToRealCommand.GiveCoins(player, playercoins + price * 2, price);
 		
-		prices.get(is.getType()).itemBought(); // Update prices
+		prices.get(is.getType()).itemBought(stock.get(is.getType())); // Update prices
 	}
 	
 	public void createGUI(Player player) {
@@ -228,7 +222,7 @@ public class TraderTrait extends Trait{
 				if (i*25+j >= allItemsToSell.size()) {break;}
 				ItemStack gItem = allItemsToSell.get(i*25+j);
 				Material item = gItem.getType();	
-				int price = prices.get(item).getPrice() * gItem.getAmount();
+				int price = prices.get(item).getPrice(gItem.getAmount());
 				
 				// Set item price to meta
 				ItemMeta temitem_meta = gItem.getItemMeta();				
@@ -276,7 +270,8 @@ public class TraderTrait extends Trait{
 				}
 				return;
 			}
-			int itemPrice = prices.get(is.getType()).getPrice() * is.getAmount() / 2;
+			int itemPrice = prices.get(is.getType()).getPrice(is.getAmount())  / 2;
+			if(itemPrice == 0) itemPrice = 1;
 			plugin.localeManager.sendMessage(sender, ChatColor.RED + "<Торговец>" + 
 				ChatColor.AQUA + ": За " + ChatColor.AQUA + "<item>" + ChatColor.AQUA + " я дам " + itemPrice + " червонцев", is.getType(), (short) 0, null);
 			return;
@@ -298,6 +293,19 @@ public class TraderTrait extends Trait{
 		Player player = nre.getClicker();
 		ItemStack is = player.getInventory().getItemInMainHand();
 		if(is == null || is.getType() == null || is.getType() == Material.AIR) {
+			if(plugin.tradingCurrently.containsValue(npc)) {
+				HashMap<Player, NPC> copy = (HashMap<Player, NPC>) plugin.tradingCurrently.clone();
+				for(Player p : copy.keySet()) {
+					NPC n = copy.get(p);
+					if(n.equals(npc) && !p.isOnline()) {
+						plugin.tradingCurrently.remove(p);
+					}else if(n.equals(npc)){
+						player.sendMessage(ChatColor.RED + "<Торговец>: Я сейчас торгую с другим игроком("
+								+ p.getName() + ChatColor.RED + ")!");
+						return;
+					}
+				}
+			}
 			createGUI(player);
 		}else {
 			sellItem(is, player);
@@ -316,77 +324,10 @@ public class TraderTrait extends Trait{
 			return 0;
 		}
 	}
-}
-// TODO remove public
-class ItemInfoTrading
-{
-	Material ItemType;
-	long lastBuyTime;
-	int currentPrice;
-	int basePrice;
-	ArrayList<Integer> savedNumberOfStocks = new ArrayList<Integer>();
-	/**
-	 * Object for price change mechanics
-	 * @param initialPrice = current price at the moment of initialization
-	 * @param base = base price, should be defined in config
-	 * @param lastBuy = last time of this item type buying(from this trader)
-	 * @param lastSoldNumber = number of item sold by last 5 sells
-	 * @param type = type of item(Material)
-	 */
-	
-	public ItemInfoTrading(int initialPrice, int base, long lastBuy, Material type) {
-		currentPrice = initialPrice;
-		lastBuyTime = lastBuy;
-		ItemType = type;
-		basePrice = base;
-	}
-	/**
-	 * Should be called every N-th tick. <Optimized externally>
-	 */
-	public void marketChange() {
-		//int maxSize = new ItemStack(ItemType).getMaxStackSize();
-		double decreasePercent = 100.0; // TODO calculated by magic
-		// LastBuyTime + maxStackSize + basePrice + ...
-		currentPrice = changePriceByPercent(currentPrice, decreasePercent);
-	}
-	/**
-	 * Should be called after item bought from player(- money, +stock)
-	 */
-	public void itemBought() {
-		
-	}
-	/**
-	 * Should be called after item sold to player(+ money, - stock)
-	 */
-	public void itemSold() {
-		setNewBuyTime();
-		double increasePercent = 10.0; // TODO calculate by magic
-		// LastBuyTime + maxStackSize + basePrice + ...
-		currentPrice = changePriceByPercent(currentPrice, increasePercent);
-	}
-	
-	private int changePriceByPercent(int price, double percent) {
-		double newPrice = price * percent / 100.0;
-		int intPart = (int)newPrice;
-		return intPart;
-	}
-	
-	/**
-	 * Get price from item info
-	 * @return 
-	 */
-	public int getPrice() {
-		return currentPrice;
-	}
-	
-	/**
-	 * Should be called after item buy
-	 */
-	public void setNewBuyTime() {
-		lastBuyTime = System.currentTimeMillis();
-	}
 	
 }
+
+
 
 
 

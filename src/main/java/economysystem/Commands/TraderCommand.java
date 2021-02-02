@@ -1,6 +1,8 @@
 package economysystem.commands;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -12,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import Karavany.NPCConvoyTrait;
+import economysystem.CitizensNPC.ItemInfoTrading;
 import economysystem.CitizensNPC.TraderTrait;
 import factionsystem.Main;
 import net.citizensnpcs.api.CitizensAPI;
@@ -55,6 +58,26 @@ public class TraderCommand {
 		npc2.getOrAddTrait(LookClose.class).toggle();
 		
 		npc2.spawn(loc);
+		
+		
+		 
+		// ! Load prices from base config !
+		// initial, basePrice, baseStock, lastBuy, baseTime, type, marketchange
+		TraderTrait trait = npc2.getTrait(TraderTrait.class);
+		long currTime = System.currentTimeMillis();
+		
+		ArrayList<ItemInfoTrading> prices = new ArrayList<ItemInfoTrading>();
+		prices.add(new ItemInfoTrading(1.5, 1.0, 2.0, currTime, 
+				TimeUnit.MINUTES.toMillis(10), Material.WOOD));
+		/*
+		prices.add(new ItemInfoTrading(12.2, 10.0, 3.0, currTime, 
+						TimeUnit.MINUTES.toMillis(10), Material.DIAMOND_SWORD));
+		
+		prices.add(new ItemInfoTrading(1.2, 2.0, 2.0, currTime, 
+						TimeUnit.MINUTES.toMillis(10),
+				Material.STONE));*/
+		trait.loadPrices(prices);
+		
 	}
 	
 }

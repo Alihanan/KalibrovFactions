@@ -27,6 +27,7 @@ import org.bukkit.event.entity.LingeringPotionSplashEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -276,6 +277,12 @@ public class Main extends JavaPlugin implements Listener {
     	PlayerClickEventHandler creh = new PlayerClickEventHandler(this);
     	creh.GUIClick(ice);
     } 
+    @EventHandler()
+    public void PlayerCloseInvent(InventoryCloseEvent ice) {
+    	PlayerClickEventHandler creh = new PlayerClickEventHandler(this);
+    	creh.InventoryClose(ice);
+    }     
+    
     /**
      * Vlad, eto tvoe ^^^^^^^
      */
