@@ -1,5 +1,6 @@
 package economysystem.commands;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
@@ -21,6 +22,7 @@ import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.event.NPCTraitCommandAttachEvent;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.trait.LookClose;
+import net.minecraft.server.v1_12_R1.NBTTagCompound;
 
 public class TraderCommand {
 	Main plugin;
@@ -32,7 +34,7 @@ public class TraderCommand {
 	public void handle(Player sender, String[] args) {
 		Location loc = sender.getLocation();
 		
-		NPC npc2 = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, ChatColor.RED 
+		NPC npc2 = CitizensAPI.getNPCRegistry().createNPC(EntityType.HORSE, ChatColor.RED 
     			+ "Торговец");
 		
 		//HashMap<String, Integer> cc = plugin.customconfig.currency;
@@ -41,15 +43,8 @@ public class TraderCommand {
 		items.put(Material.DIAMOND_SWORD, 3);
 		items.put(Material.WOOD, 80);
 		items.put(Material.STONE, 80);
+		items.put(Material.GOLD_BLOCK, 3);
 		
-		
-		/*
-		for(String s : cc.keySet()) {
-			Material m = Material.valueOf(s);
-			if(m == null) continue;
-			ItemStack is = new ItemStack(m);
-			items.put(is, cc.get(s));
-		}*/
     	npc2.addTrait(new TraderTrait(items, plugin));  
 		Bukkit.getPluginManager().callEvent(new NPCTraitCommandAttachEvent(npc2, TraderTrait.class, null));
 		
@@ -59,8 +54,6 @@ public class TraderCommand {
 		
 		npc2.spawn(loc);
 		
-		
-		 
 		// ! Load prices from base config !
 		// initial, basePrice, baseStock, lastBuy, baseTime, type, marketchange
 		TraderTrait trait = npc2.getTrait(TraderTrait.class);
@@ -68,7 +61,7 @@ public class TraderCommand {
 		
 		ArrayList<ItemInfoTrading> prices = new ArrayList<ItemInfoTrading>();
 		prices.add(new ItemInfoTrading(1.5, 1.0, 2.0, currTime, 
-				TimeUnit.MINUTES.toMillis(10), Material.WOOD));
+				TimeUnit.MINUTES.toMillis(10), Material.WOOD, 250));
 		/*
 		prices.add(new ItemInfoTrading(12.2, 10.0, 3.0, currTime, 
 						TimeUnit.MINUTES.toMillis(10), Material.DIAMOND_SWORD));
@@ -79,5 +72,7 @@ public class TraderCommand {
 		trait.loadPrices(prices);
 		
 	}
+	
+	
 	
 }

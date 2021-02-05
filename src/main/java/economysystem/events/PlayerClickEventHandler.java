@@ -30,6 +30,7 @@ public class PlayerClickEventHandler {
 	public void InventoryClose(InventoryCloseEvent ice) {
 		Player player = (Player) ice.getPlayer();
 		if(plugin.tradingCurrently.containsKey(player)) {
+			System.out.println("Убираю " + player.getName() + " от торговца");
 			plugin.tradingCurrently.remove(player);
 		}
 	}
@@ -65,7 +66,7 @@ public class PlayerClickEventHandler {
 					if (index_page<0) {
 						index_page = trait.guis.length - 1;
 					}
-					player.closeInventory();
+					player.closeInventory();					
 					Inventory gui = Bukkit.createInventory(player, 27,ChatColor.AQUA+ "Страница "+ (index_page + 1));
 					gui.setContents(trait.guis[index_page]);
 					player.openInventory(gui);

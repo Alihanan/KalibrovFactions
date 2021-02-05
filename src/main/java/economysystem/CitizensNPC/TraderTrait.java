@@ -1,5 +1,6 @@
 package economysystem.CitizensNPC;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
@@ -21,6 +22,7 @@ import net.citizensnpcs.api.event.NPCLeftClickEvent;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.Trait;
+import net.minecraft.server.v1_12_R1.NBTTagCompound;
 
 public class TraderTrait extends Trait{
 	// How many items this trader has
@@ -93,7 +95,7 @@ public class TraderTrait extends Trait{
 		super.onSpawn();
 		// Делает что то когда НПС заспавнится
 	}
-	
+
 	int timer = 0;
 	@Override
 	public void run() {
@@ -102,22 +104,28 @@ public class TraderTrait extends Trait{
 		
 		if(timer % PRICE_UPDATE_TICKRATE == 0) {			
 			timer = 0;
+
 			// Если торгуют - пока не меняем цены! 
 			// Но проверяем не вышел ли игрок!
 			if(plugin.tradingCurrently.containsValue(npc)) {
 				HashMap<Player, NPC> copy = (HashMap<Player, NPC>) plugin.tradingCurrently.clone();
 				for(Player p : copy.keySet()) {
 					NPC n = copy.get(p);
+					String page = p.getOpenInventory().getTitle().split(" ")[0];
 					if(n.equals(npc) && !p.isOnline()) {
+						System.out.println("Убираю " + p.getName() + " от торговца");
 						plugin.tradingCurrently.remove(p);
-					}else if(n.equals(npc)){
+					}else if(n.equals(npc) && !page.equals(ChatColor.AQUA + "Страница")){
+						System.out.println("Убираю " + p.getName() + " от торговца");
+						plugin.tradingCurrently.remove(p);		
+					}else if(n.equals(npc)) {
 						return;
 					}
 				}
 			}
 			// Меняем
 			for(ItemInfoTrading iit : prices.values()) {
-				iit.marketChange(stock.get(iit.ItemType));
+				iit.marketChange(stock.get(iit.ItemType), balance);
 			}
 		}
 	}
@@ -164,8 +172,8 @@ public class TraderTrait extends Trait{
 		ItemStack toGive = new ItemStack(m, amount);
 		player.getInventory().addItem(toGive);
 		player.sendMessage(ChatColor.GREEN+"Операция выполнена, ваш баланс "+(playercoins-price));
-		
-		prices.get(m).itemSold(stock.get(m)); // Update prices
+		balance += price;
+		prices.get(m).itemSold(stock.get(m), balance); // Update prices
 		
 		// restart GUI
 		player.closeInventory();
@@ -185,17 +193,25 @@ public class TraderTrait extends Trait{
 			}
 			return;
 		}
-		addToStock(is);
+		
 		int price = prices.get(is.getType()).getPrice(is.getAmount()) / 2;
 		if(price == 0) price = 1;
-
+		if(balance < price + 1) {
+			player.sendMessage(ChatColor.RED+"<Торговец>: Прости, но у меня нет злотых. Может сначала купишь что нибудь?");
+			return;
+		}
+		
+		addToStock(is);
+		
+		
 		player.getInventory().removeItem(is);
 		int playercoins = InfoCoinsCommand.infoCoins(player);
 		// Give money
 		TradeToRealCommand.TakeCoins(player);
 		TradeToRealCommand.GiveCoins(player, playercoins + price * 2, price);
+		balance -= price;
 		
-		prices.get(is.getType()).itemBought(stock.get(is.getType())); // Update prices
+		prices.get(is.getType()).itemBought(stock.get(is.getType()), balance); // Update prices
 	}
 	
 	public void createGUI(Player player) {
@@ -251,7 +267,7 @@ public class TraderTrait extends Trait{
     	Inventory gui = Bukkit.createInventory(player, 27,ChatColor.AQUA+ "Страница 1");
 		gui.setContents(guis[0].clone());
 		player.openInventory(gui);
-		plugin.tradingCurrently.put(player, npc);//TODO
+		plugin.tradingCurrently.put(player, npc);
 	}
 	/**
 	 * After player left clicks with item
@@ -274,6 +290,8 @@ public class TraderTrait extends Trait{
 			if(itemPrice == 0) itemPrice = 1;
 			plugin.localeManager.sendMessage(sender, ChatColor.RED + "<Торговец>" + 
 				ChatColor.AQUA + ": За " + ChatColor.AQUA + "<item>" + ChatColor.AQUA + " я дам " + itemPrice + " червонцев", is.getType(), (short) 0, null);
+			if((itemPrice + 1) > balance)
+				sender.sendMessage(ChatColor.RED + "<Торговец>: Правда я у тебя его не куплю. Не хватает злотых. Может ты сначала купишь у меня?");
 			return;
 		}
 		
