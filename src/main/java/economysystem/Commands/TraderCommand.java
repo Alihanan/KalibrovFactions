@@ -34,7 +34,7 @@ public class TraderCommand {
 	public void handle(Player sender, String[] args) {
 		Location loc = sender.getLocation();
 		
-		NPC npc2 = CitizensAPI.getNPCRegistry().createNPC(EntityType.HORSE, ChatColor.RED 
+		NPC npc2 = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, ChatColor.RED 
     			+ "Торговец");
 		
 		//HashMap<String, Integer> cc = plugin.customconfig.currency;
